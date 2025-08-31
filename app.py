@@ -17,7 +17,7 @@ def create_app():
 
     @app.route("/")
     def home():
-        return "🚀 Microservicio de Mantenimientos corriendo"
+        return "Microservicio de Mantenimientos corriendo"
 
     return app
 
