@@ -1,10 +1,10 @@
 from flask import Blueprint, request, jsonify
 from flasgger import swag_from
-from simulation.MantenimientoService import MantenimientoService
-from simulation.Mantenimiento import Mantenimiento
+from persistence.servicelmpl.MantenimientoServiceDb import MantenimientoServiceDb
+from flask import Blueprint
 
 mantenimiento_bp = Blueprint("mantenimiento", __name__)
-service = MantenimientoService()
+service = MantenimientoServiceDb()
 
 # ---------------------------------------------------
 # GET all
@@ -34,8 +34,18 @@ service = MantenimientoService()
 })
 @mantenimiento_bp.route("/mantenimientos", methods=["GET"])
 def get_all():
-    mantenimientos = [m.__dict__ for m in service.find_all()]
-    return jsonify(mantenimientos), 200
+    mantenimientos = service.find_all()
+    resp = [{
+        'id': m.id,
+        'avion_id': m.avion_id,
+        'tipo': m.tipo,
+        'descripcion': m.descripcion,
+        'fecha': str(m.fecha),
+        'responsable': m.responsable,
+        'costo': m.costo,
+        'estado': m.estado,
+    } for m in mantenimientos]
+    return jsonify(resp), 200
 
 
 # ---------------------------------------------------
@@ -59,9 +69,19 @@ def get_all():
 })
 @mantenimiento_bp.route("/mantenimientos/<string:id>", methods=["GET"])
 def get_by_id(id):
-    mantenimiento = service.find_by_id(id)
-    if mantenimiento:
-        return jsonify(mantenimiento.__dict__), 200
+    m = service.find_by_id(id)
+    if m:
+        resp = {
+            'id': m.id,
+            'avion_id': m.avion_id,
+            'tipo': m.tipo,
+            'descripcion': m.descripcion,
+            'fecha': str(m.fecha),
+            'responsable': m.responsable,
+            'costo': m.costo,
+            'estado': m.estado,
+        }
+        return jsonify(resp), 200
     return jsonify({"message": "Mantenimiento no encontrado"}), 404
 
 
@@ -95,16 +115,18 @@ def get_by_id(id):
 @mantenimiento_bp.route("/mantenimientos", methods=["POST"])
 def create():
     data = request.json
-    nuevo = Mantenimiento(
-        avion_id=data["avion_id"],
-        tipo=data["tipo"],
-        descripcion=data["descripcion"],
-        fecha=data["fecha"],
-        responsable=data["responsable"],
-        costo=data["costo"]
-    )
-    service.save(nuevo)
-    return jsonify(nuevo.__dict__), 201
+    creado = service.save(data)
+    resp = {
+        'id': creado.id,
+        'avion_id': creado.avion_id,
+        'tipo': creado.tipo,
+        'descripcion': creado.descripcion,
+        'fecha': str(creado.fecha),
+        'responsable': creado.responsable,
+        'costo': creado.costo,
+        'estado': creado.estado,
+    }
+    return jsonify(resp), 201
 
 
 # ---------------------------------------------------
@@ -127,7 +149,17 @@ def update(id):
     data = request.json
     actualizado = service.update(id, data)
     if actualizado:
-        return jsonify(actualizado.__dict__), 200
+        resp = {
+            'id': actualizado.id,
+            'avion_id': actualizado.avion_id,
+            'tipo': actualizado.tipo,
+            'descripcion': actualizado.descripcion,
+            'fecha': str(actualizado.fecha),
+            'responsable': actualizado.responsable,
+            'costo': actualizado.costo,
+            'estado': actualizado.estado,
+        }
+        return jsonify(resp), 200
     return jsonify({"message": "Mantenimiento no encontrado"}), 404
 
 
@@ -165,8 +197,18 @@ def delete(id):
 })
 @mantenimiento_bp.route("/mantenimientos/avion/<string:avion_id>", methods=["GET"])
 def get_by_avion(avion_id):
-    mantenimientos = [m.__dict__ for m in service.find_by_avion(avion_id)]
-    return jsonify(mantenimientos), 200
+    mantenimientos = service.find_by_avion(avion_id)
+    resp = [{
+        'id': m.id,
+        'avion_id': m.avion_id,
+        'tipo': m.tipo,
+        'descripcion': m.descripcion,
+        'fecha': str(m.fecha),
+        'responsable': m.responsable,
+        'costo': m.costo,
+        'estado': m.estado,
+    } for m in mantenimientos]
+    return jsonify(resp), 200
 
 
 # ---------------------------------------------------
@@ -182,5 +224,15 @@ def get_by_avion(avion_id):
 })
 @mantenimiento_bp.route("/mantenimientos/estado/<string:estado>", methods=["GET"])
 def get_by_estado(estado):
-    mantenimientos = [m.__dict__ for m in service.find_by_estado(estado)]
-    return jsonify(mantenimientos), 200
+    mantenimientos = service.find_by_estado(estado)
+    resp = [{
+        'id': m.id,
+        'avion_id': m.avion_id,
+        'tipo': m.tipo,
+        'descripcion': m.descripcion,
+        'fecha': str(m.fecha),
+        'responsable': m.responsable,
+        'costo': m.costo,
+        'estado': m.estado,
+    } for m in mantenimientos]
+    return jsonify(resp), 200
